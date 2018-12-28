@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Configure</title>
+<style type="text/css">
+.header {
+	background: #D0E4F5;
+	border-radius: 5px;
+}
+.green{
+	color: green
+}
+.red{
+	color: red
+}
+
+</style>
+
+</head>
+<body>
+<form id='form_id'>
+<table style="margin-left: auto; margin-right: auto;">
+	<tr class="header"><td colspan="2">Person Info</td></tr>
+	<tr><td class="lable">Name</td><td><input name="name" id="name" type="text"  /></td></tr>
+	<tr><td class="lable">Age</td> <td><input name="age" id="age" type="password" /></td></tr>
+	<tr><td class="lable">City</td><td><input name="city" id="city" type="text"  /></td></tr>
+	<tr class="header"><td colspan="2">Bank Info</td></tr>
+	<tr><td class="lable">Bank Name</td> <td><input name="bank.name" id="bank.name" type="text"/></td></tr>
+	<tr><td class="lable">Account Number</td> <td><input name="bank.acctNumber" id="bank.acctNumber" type="password" ondblclick="reveal(this)" onclick="passChanged('bank.acctNumber')"/></td></tr>
+	<tr><td class="lable"></td> <td><input name="bank.acctNumber.confirm" id="bank.acctNumber.confirm" type="password" ondblclick="reveal(this)" onclick="passChanged('bank.acctNumber')"/></td></tr>
+	<tr><td class="lable">Daily Update</td> <td><input name="bank.dailyUpdate" id="bank.dailyUpdate" type="checkbox"/></td></tr>
+	
+	<tr>
+		<td class="lable"><button id="save" onclick="onSave()">Save</button></td>
+		<td style="text-align: right"><button  onclick="onCancel();">Cancel</button></td>
+	</tr>
+</table>
+</form>
+
+<script type="text/javascript">
+	var confData = null;
+	var formdef   = {};
+	function debug(msg){
+		//document.getElementById('debugText').innerText = 'msg:'+msg
+		console.log('msg:'+msg)
+	}
+	
+	function passChanged(elementId){
+		var one = document.getElementById(elementId)
+		var two = document.getElementById(elementId+'.confirm')
+		var color = ''
+		if ( one.value != two.value){
+			color = 'red';
+		}else{
+			color = 'green'
+		}
+		
+		one.classList = color;
+		two.classList = color;
+		document.getElementById('save').disabled = (one.value != two.value)
+	}
+
+	function onSave(){
+		var fd = document.querySelectorAll("#form_id input")
+		var tmp = {}
+		fd.forEach(function (element){
+			let inputId = element.id
+			let encrypted = formdef[inputId]
+			let theVal = element.value
+			if ( 'encrypted' == encrypted){
+				theVal = app.encrypt(theVal)
+				console.log('Encrypted to '+ theVal)
+			}
+			if (!inputId.endsWith('.confirm')){
+				let jsExpression = ''
+				if (element.type == 'text' ||element.type == 'password' ){
+					jsExpression = "confData."+ inputId + '="' + theVal +'"'
+				} else if (element.type == 'checkbox'){
+					jsExpression = "confData."+ inputId + '=' + element.checked ;
+				}
+
+				console.log (jsExpression)
+				eval(jsExpression)
+			}
+		});
+		app_saveData(confData)
+	}
+	
+	
+	function onCancel(){
+		app_cancel()
+	}
+	
+	
+	function setFormValues(value, parentObj){
+		for(name in value){
+			var key = name;
+			var inputId = name;
+			if ( parentObj != ''){
+				inputId = parentObj + '.' + inputId
+			}
+			var aVal = value[key]
+			if ( typeof aVal === 'object' && aVal !== null){
+				let po = inputId
+				setFormValues(aVal,po)
+			}else{
+				let encrypted = formdef[inputId]
+				if ( 'encrypted' == encrypted){
+					aVal = app.decrypt(aVal)
+					//console.log('Decrypted to '+ aVal)
+				}
+				let element = document.getElementById(inputId)
+				if ( element != undefined){
+					
+					if (element.type == 'text' ||element.type == 'password' ){
+						element.value = aVal
+					} else if (element.type == 'checkbox'){
+						element.checked = aVal;
+					}
+				}
+				
+				var element2 = document.getElementById(inputId+'.confirm')
+				if ( element2 != undefined){
+					element2.value = element.value
+				}
+				
+			}
+		}
+	}
+	
+	
+	window.app_loadData = function(valuesJson){
+		debug(valuesJson)
+		let inData = JSON.parse(valuesJson)
+		let val    = JSON.parse(inData.value);//.confData)
+		let confDataJSON   = val.confData
+		confData   = JSON.parse(confDataJSON)
+		formdef    = val.formdef
+		setFormValues(confData,'')
+		return window
+	}
+
+	function app_saveData(val){
+		var json = JSON.stringify({confData:val})
+		app.save(json)
+	}
+
+	function app_cancel(){
+		app.exit();
+	}
+	
+	function chromeDebugStub(){
+		window.app = {}
+		app.encrypt = function(text){
+			return 'XXXX';
+		}
+		app.decrypt = function(text){
+			return 'CLEAR';
+		}
+		app.save = function(text){
+			console.log('Following text will be sent to app')
+			console.log(text)
+		}
+		app.cancel = function(){
+			console.log('app.cancel called')
+		}
+		
+	}
+	
+	function reveal(text){
+		text.type = 'text'
+		setTimeout(function(){
+			text.type ='password'
+		},5000);
+	}
+</script>
+</body>
+</html>

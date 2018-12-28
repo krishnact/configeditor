@@ -1,0 +1,6 @@
+{
+        "age": "encrypted",
+        "city": "",
+        "name": "",
+        "bank.acctNumber": "encrypted"
+}

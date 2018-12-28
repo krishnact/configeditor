@@ -1,0 +1,150 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.github.krishnact</groupId>
+	<artifactId>configeditor</artifactId>
+	<version>0.0.1</version>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>false</downloadJavadocs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.gmavenplus</groupId>
+				<artifactId>gmavenplus-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>addSources</goal>
+							<goal>addTestSources</goal>
+							<goal>generateStubs</goal>
+							<goal>compile</goal>
+							<goal>testGenerateStubs</goal>
+							<goal>testCompile</goal>
+							<goal>removeStubs</goal>
+							<goal>removeTestStubs</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<sources>
+						<source>
+							<directory>${project.basedir}/src</directory>
+							<includes>
+								<include>**/*.groovy</include>
+							</includes>
+						</source>
+					</sources>
+					<scripts>
+						<script><![CDATA[
+            // your script here
+          ]]></script>
+					</scripts>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy</artifactId>
+						<!-- any version of Groovy \>= 1.8.2 should work here -->
+						<version>2.5.1</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
+				<executions>
+					<!-- execution> <id>copy-dependencies</id> <phase>package</phase> <goals> 
+						<goal>copy-dependencies</goal> </goals> <configuration> <source>1.8</source> 
+						<target>1.8</target> <outputDirectory>${project.build.directory}/lib</outputDirectory> 
+						<overWriteReleases>false</overWriteReleases> <overWriteSnapshots>false</overWriteSnapshots> 
+						<overWriteIfNewer>true</overWriteIfNewer> </configuration> </execution -->
+				</executions>
+			</plugin>
+			<plugin>
+				<inherited>true</inherited>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<!-- plugin>
+				<inherited>true</inherited>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<!-- Run shade goal on package phase -->
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<transformers>
+								<!-- add Main-Class to manifest file -->
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>org.himalay.config.Editor</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<artifactId>oshi-core</artifactId>
+			<groupId>com.github.oshi</groupId>
+			<version>3.11.0</version>
+		</dependency>
+		<dependency>
+			<artifactId>commandlinetool-base</artifactId>
+			<groupId>com.github.krishnact</groupId>
+			<version>0.4.9</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.7</version>
+		</dependency>
+	</dependencies>
+</project>
