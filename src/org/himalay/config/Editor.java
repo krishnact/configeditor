@@ -37,7 +37,7 @@ public class Editor extends Application {
     	}else{
     		this.encKey = defaultEncKey();
     	}
-    	this.opts.exposeToJmx();
+    	//this.opts.exposeToJmx();
         stage.setTitle(opts.getTitle());
         Browser brs = new Browser(this);
         
