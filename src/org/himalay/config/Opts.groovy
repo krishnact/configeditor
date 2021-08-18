@@ -37,7 +37,7 @@ public class Opts extends CLTBaseQuiet{
 	@Option
 	File htmlForm
 	
-	@Option(required = true)
+	@Option
 	File configJsonFile
 
 	

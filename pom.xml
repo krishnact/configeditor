@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.krishnact</groupId>
 	<artifactId>configeditor</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.2</version>
 	<properties>
-		<groovyVersion>2.5.1</groovyVersion>
+		<groovyVersion>3.0.7</groovyVersion>
 		<comment>To build the shaded jar execute this "mvn clean package
 			org.apache.maven.plugins:maven-shade-plugin:3.2.1:shade"</comment>
 	</properties>
@@ -75,7 +75,7 @@
 						<groupId>org.codehaus.groovy</groupId>
 						<artifactId>groovy</artifactId>
 						<!-- any version of Groovy \>= 1.8.2 should work here -->
-						<version>2.5.1</version>
+						<version>3.0.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -134,7 +134,8 @@
 		<dependency>
 			<artifactId>commandlinetool-base</artifactId>
 			<groupId>com.github.krishnact</groupId>
-			<version>0.4.9</version>
+			<version>0.4.11</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>

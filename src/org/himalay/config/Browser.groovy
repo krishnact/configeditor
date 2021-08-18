@@ -30,11 +30,13 @@ import groovy.cli.commons.OptionAccessor;
 public class Browser extends Region implements AutoLogger {
 	public static org.slf4j.Logger Logger = LoggerFactory.getLogger(Browser.class)
 	final WebView webview = new WebView();
-	final WebEngine webEngine = webview.getEngine();
-	BrowserJavaPeer bp =new BrowserJavaPeer(this);
+	public final WebEngine webEngine = webview.getEngine();
+	BrowserJavaPeer bp = null//new BrowserJavaPeer(this);
 	final Console console =new Console();
 	boolean loaded = false;
 	Editor editor;
+	JSObject win ;
+
 	public Browser(Editor editor) {
 		info "Creating browser"
 		
@@ -47,30 +49,35 @@ public class Browser extends Region implements AutoLogger {
 		webEngine.getLoadWorker().stateProperty().addListener(
 				new ChangeListener<State>() {
 					@Override
-					public void changed(ObservableValue<? extends State> ov,
+					public void changed(@SuppressWarnings("restriction") ObservableValue<? extends State> ov,
 							State oldState, State newState) {
-						if (newState == State.SUCCEEDED) {
-							JSObject win = (JSObject) webEngine.executeScript("window");
-							//bp.load();
-							if ( editor.opts.startDebugger){
-								info ("Starting debugger")
-								webEngine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
-							}
-							Platform.runLater(new Runnable() {
-										@Override public void run() {
-											info "Browser ready now"
-											//println "Set java app object"
-											addAppObjects();
-											bp.init();
-										}
-									});
-
+						Logger.info("State ${oldState} to ${newState}");
+						if (newState == State.RUNNING) {
+							
+								JSObject win = (JSObject) webEngine.executeScript("window");
+								//bp.load();
+								if ( editor.opts.startDebugger){
+									info ("Starting debugger")
+									webEngine.executeScript("if (!document.getElementById('FirebugLite')){E = document['createElement' + 'NS'] && document.documentElement.namespaceURI;E = E ? document['createElement' + 'NS'](E, 'script') : document['createElement']('script');E['setAttribute']('id', 'FirebugLite');E['setAttribute']('src', 'https://getfirebug.com/' + 'firebug-lite.js' + '#startOpened');E['setAttribute']('FirebugLite', '4');(document['getElementsByTagName']('head')[0] || document['getElementsByTagName']('body')[0]).appendChild(E);E = new Image;E['setAttribute']('src', 'https://getfirebug.com/' + '#startOpened');}");
+								}
+								addAppObjects();
+								String scr  = editor.getOnRunningScript()
+								
+								Platform.runLater(new Runnable() {
+											@Override public void run() {
+												info "Browser ready now"
+												webEngine.executeScript(scr)
+												//println "Set java app object"
+												bp.init();
+											}
+										});
+							
 						}
 					}
 				}
 				);
 		webEngine.debugger.setEnabled(true)
-		addAppObjects();
+		//addAppObjects();
 		webEngine.load(urlStr)
 		//add the web view to the scene
 		getChildren().add(webview);
@@ -78,13 +85,18 @@ public class Browser extends Region implements AutoLogger {
 	}
 
 	private void addAppObjects(){
-		JSObject win = (JSObject) webEngine.executeScript("window");
-		bp =new BrowserJavaPeer(bp.browser);
+		win = (JSObject) webEngine.executeScript("window");
+		bp =new BrowserJavaPeer(this);
 		debug "Adding console and app"
-		win.setMember("app", bp);
+		win.setMember("app", editor);
+		win.setMember("iotool", bp);
 		win.setMember("console", console);
-
+		this.editor.getWindowObjects().each{k,v->
+			win.setMember(k, v)
+		}
 	}
+	
+	
 //		def result = webEngine.executeScript('''
 //			window.app_hello = function(valuesJson){
 //				debug(valuesJson)

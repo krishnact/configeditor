@@ -10,7 +10,7 @@ import javafx.application.Platform
 
 public class BrowserJavaPeer implements AutoLogger{
 
-	public static org.slf4j.Logger Logger = LoggerFactory.getLogger(BrowserJavaPeer.class)
+	public static org.slf4j.Logger log = LoggerFactory.getLogger(BrowserJavaPeer.class)
 	Browser browser;
 	
 	
@@ -94,7 +94,12 @@ public class BrowserJavaPeer implements AutoLogger{
 	
 
 	public String loadConf() {
-		String dataText = this.browser.editor.processLoadingData(this.browser.editor.opts.configJsonFile.text);
+		String dataText = '{}'
+		if (this.browser.editor.opts.configJsonFile!=null) {
+			dataText = this.browser.editor.processLoadingData(this.browser.editor.opts.configJsonFile.text);
+		}else {
+			log.info("Config file not avilable")
+		}
 		return dataText
 	}
 	

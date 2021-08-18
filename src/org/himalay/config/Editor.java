@@ -3,10 +3,12 @@ package org.himalay.config;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.himalay.commandline.CLTBase;
 import org.himalay.commandline.Util;
+import org.slf4j.LoggerFactory;
 
 import javafx.application.Application;
 //import javafx.geometry.HPos;
@@ -24,28 +26,68 @@ import javafx.stage.Stage;
  
  
 public class Editor extends Application {
+	public static org.slf4j.Logger log = LoggerFactory.getLogger(Editor.class);
 	Opts opts;
     private Scene scene;
     static String[] origArgs = null;
     String encKey = null;
-    @Override 
+    Browser brs= null;
+    public Opts getOpts() {
+		return opts;
+	}
+
+	public void setOpts(Opts opts) {
+		this.opts = opts;
+	}
+
+	public Browser getBrs() {
+		return brs;
+	}
+
+	public void setBrs(Browser brs) {
+		this.brs = brs;
+	}
+
+	public void beforeStart() {
+		
+	}
+	
+	public String getOnRunningScript() {
+		return "";
+	}
+	
+	@Override 
     public void start(Stage stage) {
-       // create the scene
-    	this.opts = getOptions();
+	    this.opts = getOptions();
+		beforeStart();
+		if (this.brs == null) {
+			postCreate();
+		}
+
     	if ( opts.getEncryptionKey() != null){
     		this.encKey = opts.getEncryptionKey();
     	}else{
     		this.encKey = defaultEncKey();
     	}
     	//this.opts.exposeToJmx();
-        stage.setTitle(opts.getTitle());
-        Browser brs = new Browser(this);
-        
+    	// create the scene
+	    stage.setTitle(opts.getTitle());
         scene = new Scene(brs,opts.getWidth(),opts.getHeight(), Color.web("#666970"));
         stage.setScene(scene);
         stage.show();
     }
     
+    public Editor() {
+    }
+    
+    public void postCreate() {
+    	brs = new Browser(this);
+    }
+    
+    public Map<String,Object> getWindowObjects() {
+    	log.info("No additional objects being set.");
+    	return new HashMap<String, Object>();
+    }
     
     public String defaultEncKey(){
     	
@@ -121,12 +163,11 @@ public class Editor extends Application {
 		return procId.substring(0, 15);
 	}
 
-	Map<?,?> getFormDef(){
+	public Map<?,?> getFormDef(){
 		if (this.opts.getFormDef() != null && this.opts.getFormDef().exists()){
 			return (Map<?,?>)(new Util().getJsonConf(this.opts.getFormDef().getAbsolutePath()));
 		}
 		return null;
-		
 	}
 }
 
